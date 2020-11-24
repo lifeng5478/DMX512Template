@@ -42,9 +42,31 @@ void dmx512_initial(uint16_t (*rec_call)(void))
   ***********************************************************/
 void dmx512_rec(void)
 {
-	dmx512.recbuf[dmx512.bufcount++] = (dmx512.rec_callback());
-	dmx512.rec_run = 1;
-	dmx512.rec_time = 0;
+	uint16_t udr;
+	udr = (dmx512.rec_callback());
+	dmx512.RX8_DATA = (udr&0x0100);
+	  dmx512.RX8_DATA = (udr&0x0100);
+	if(dmx512.RX8_DATA==0)
+	{
+	  if(!udr)
+	  {
+		  dmx512.rx_right = 1;
+	  }
+	}
+	else
+	{
+	  if(dmx512.rx_right==1)
+	  {
+		  dmx512.rec_run = 1;
+		  dmx512.recbuf[dmx512.bufcount++]=(uint8_t)(dmx512.rec_callback());
+		  if(dmx512.bufcount>=512)
+		  {
+			  dmx512.bufcount = 0;
+			  dmx512.rx_right=0;
+			  dmx512.rec_end = 1;
+		  }
+	  }
+	}
 }
 
 /************************************************************
